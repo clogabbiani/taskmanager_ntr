@@ -1,0 +1,47 @@
+{
+  "_note": "Compila email. Chiavi = displayName Jira. aliases = nomi usati in 'Assegnatari originali'.",
+  "users": [
+    {
+      "jira_display_name": "Claudio Gabbiani",
+      "jira_account_id": "6405c6f415d668edd8ef1b15",
+      "email": "clogabbiani@gmail.com",
+      "role": "owner",
+      "aliases": [
+        "Claudio"
+      ]
+    },
+    {
+      "jira_display_name": "Edoardo Salamone",
+      "jira_account_id": "5fbfd5f19592df0076f21bb4",
+      "email": null,
+      "role": "admin",
+      "aliases": [
+        "Edoardo",
+        "Salamone"
+      ]
+    },
+    {
+      "jira_display_name": "Merk",
+      "jira_account_id": "62f66abf1323922c61e4d3e1",
+      "email": null,
+      "role": "admin",
+      "aliases": [
+        "Marco"
+      ],
+      "_todo": "confermare che 'Marco' = Merk"
+    },
+    {
+      "jira_display_name": "Nicola Ferrante",
+      "jira_account_id": "712020:2c5df365-d735-424a-9175-dfe905c83429",
+      "email": null,
+      "role": "admin",
+      "aliases": [
+        "Nicola"
+      ]
+    }
+  ],
+  "external_collaborator_normalization": {
+    "india dev": "Indiani dev",
+    "indiani": "Indiani dev"
+  }
+}

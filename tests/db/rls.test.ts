@@ -120,7 +120,9 @@ describe("claim_signin (allow-list)", () => {
   });
 
   it("before-user-created hook allows listed emails and rejects others", async () => {
-    const ok = await db.query<{ r: unknown }>(`SELECT hook_before_user_created('{"user":{"email":"x@ntr.test"}}') AS r`);
+    const ok = await db.query<{ r: unknown }>(
+      `SELECT hook_before_user_created('{"user":{"email":"x@ntr.test"}}') AS r`,
+    );
     expect(ok.rows[0]!.r).toEqual({});
     const ko = await db.query<{ r: { error: { http_code: number } } }>(
       `SELECT hook_before_user_created('{"user":{"email":"x@evil.com"}}') AS r`,
@@ -138,7 +140,9 @@ describe("project visibility", () => {
 
   it("lets only admins create projects", async () => {
     await expect(
-      asUser(db, member, () => db.query(`INSERT INTO projects (workspace_id, key, name) VALUES ($1, 'QMS', 'Q')`, [WS])),
+      asUser(db, member, () =>
+        db.query(`INSERT INTO projects (workspace_id, key, name) VALUES ($1, 'QMS', 'Q')`, [WS]),
+      ),
     ).rejects.toThrow(/row-level security/);
     await asUser(db, admin, () =>
       db.query(`INSERT INTO projects (workspace_id, key, name) VALUES ($1, 'FW', 'Firmware')`, [WS]),
@@ -150,7 +154,9 @@ describe("issues", () => {
   it("lets members create issues with sequential numbers and blocks viewers", async () => {
     await insertIssue(member);
     await insertIssue(member);
-    const r = await db.query<{ number: number }>(`SELECT number FROM issues WHERE project_id = $1 ORDER BY number`, [nbi]);
+    const r = await db.query<{ number: number }>(`SELECT number FROM issues WHERE project_id = $1 ORDER BY number`, [
+      nbi,
+    ]);
     expect(r.rows.map((x) => x.number)).toEqual([1, 2]);
     await expect(insertIssue(viewer)).rejects.toThrow();
   });
@@ -190,7 +196,9 @@ describe("issues", () => {
 
 describe("membership administration", () => {
   it("prevents admins from demoting the owner", async () => {
-    expect(await affected(admin, `UPDATE workspace_members SET role = 'member' WHERE user_id = $1`, [OWNER_AUTH])).toBe(0);
+    expect(await affected(admin, `UPDATE workspace_members SET role = 'member' WHERE user_id = $1`, [OWNER_AUTH])).toBe(
+      0,
+    );
   });
 
   it("prevents admins from granting owner", async () => {

@@ -69,8 +69,7 @@ const updatedAt = () => timestamp("updated_at", { withTimezone: true }).notNull(
 const timestamps = () => ({ created_at: createdAt(), updated_at: updatedAt() });
 const archivedAt = () => timestamp("archived_at", { withTimezone: true });
 
-const userRef = (name: string) =>
-  uuid(name).references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" });
+const userRef = (name: string) => uuid(name).references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" });
 
 // ---------------------------------------------------------------------------
 // 3.1 Identity and permissions
@@ -241,7 +240,10 @@ export const issues = pgTable(
     check("issues_progress_range", sql`${t.progress} between 0 and 100`),
     check("issues_planned_days_nonneg", sql`${t.planned_days} is null or ${t.planned_days} >= 0`),
     check("issues_number_positive", sql`${t.number} > 0`),
-    check("issues_dates_order", sql`${t.start_date} is null or ${t.due_date} is null or ${t.start_date} <= ${t.due_date}`),
+    check(
+      "issues_dates_order",
+      sql`${t.start_date} is null or ${t.due_date} is null or ${t.start_date} <= ${t.due_date}`,
+    ),
     check("issues_epic_no_parent", sql`${t.type} <> 'epic' or ${t.parent_id} is null`),
   ],
 );
@@ -394,7 +396,9 @@ export const savedViews = pgTable(
     owner_id: userRef("owner_id").notNull(),
     name: text("name").notNull(),
     kind: savedViewKind("kind").notNull(),
-    config: jsonb("config").notNull().default(sql`'{}'::jsonb`),
+    config: jsonb("config")
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     is_shared: boolean("is_shared").notNull().default(false),
     ...timestamps(),
   },

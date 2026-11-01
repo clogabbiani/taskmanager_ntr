@@ -12,5 +12,7 @@ Task manager del team NTR Biosensors (sostituisce Jira). Governance e decisioni:
 6. `pnpm dev` → http://localhost:3000, login con Google.
 7. Verifiche: `pnpm lint && pnpm typecheck && pnpm test` (i test DB girano su PGlite, nessun Postgres richiesto).
 8. E2E: `pnpm exec playwright install chromium && pnpm test:e2e`.
+   - Gli spec in `e2e/app/` richiedono una sessione: `pnpm test:e2e:login` apre Chrome su `/login`, accedi con Google a mano; la sessione finisce in `e2e/.auth/user.json` (ignorato da git). Senza sessione quegli spec vengono saltati.
+   - Creano issue vere nel progetto `E2E_PROJECT_KEY` (default `E2E`): crealo prima da Impostazioni → Progetti, non usare `NBI`.
 9. Schema: modifica `src/db/schema.ts`, poi `pnpm db:generate`; SQL manuale con `pnpm drizzle-kit generate --custom`.
 10. Stringhe UI solo in `src/i18n/it.ts`.

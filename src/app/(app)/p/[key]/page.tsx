@@ -4,6 +4,7 @@ import { Lock } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { requireMember } from "@/features/auth/session";
+import { IssueList } from "@/features/issues/components/issue-list";
 import { getProjectByKey } from "@/features/projects/queries";
 import { PROJECT_VIEWS } from "@/features/projects/views";
 import { it } from "@/i18n/it";
@@ -55,9 +56,7 @@ export default async function ProjectPage({ params }: { params: Params }) {
           )}
         </TabsList>
         <TabsContent value="table">
-          <div className="text-muted-foreground rounded-lg border border-dashed p-10 text-center text-sm">
-            {it.project.tablePlaceholder}
-          </div>
+          <IssueList projectId={project.id} projectKey={project.key} />
         </TabsContent>
       </Tabs>
     </section>

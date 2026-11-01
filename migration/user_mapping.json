@@ -21,9 +21,9 @@
       ]
     },
     {
-      "jira_display_name": "Merk",
+      "jira_display_name": "Marco Brunengo",
       "jira_account_id": "62f66abf1323922c61e4d3e1",
-      "email": null,
+      "email": "m.brunengo@ntrbiosensors.com",
       "role": "admin",
       "aliases": [
         "Marco"
@@ -33,7 +33,7 @@
     {
       "jira_display_name": "Nicola Ferrante",
       "jira_account_id": "712020:2c5df365-d735-424a-9175-dfe905c83429",
-      "email": null,
+      "email": "n.ferrante@ntrbiorensors.com",
       "role": "admin",
       "aliases": [
         "Nicola"

@@ -6,7 +6,7 @@ Aggiornato: 2026-11-01 (sessione 3, M1 Issue core)
 - **M0 chiusa** e verificata in produzione (login Google con allow-list).
 - Fase 1, milestone corrente: **M1 Issue core**, in tre PR (vedi `docs/PROMPT_M1.md`):
   - PR 1 `feat/m1-issues-core` — correzioni M0 e fondamenta dati: **pronta**.
-  - PR 2 — issue: creazione, dettaglio, campi: in corso.
+  - PR 2 `feat/m1-issue-detail` (figlia della PR 1) — issue: creazione, dettaglio, campi: **pronta**.
   - PR 3 — vista Tabella, viste salvate, Impostazioni: da fare.
 
 ## M1 — PR 1 (correzioni M0 e fondamenta dati)
@@ -29,6 +29,18 @@ Aggiornato: 2026-11-01 (sessione 3, M1 Issue core)
 - Layout: sidebar progetti + "I miei task" (placeholder), topbar con ricerca placeholder, menu utente (ruolo, tema, logout), pagina `/p/[key]` con tab (solo Tabella attiva, placeholder M1). Responsive con sidebar a scomparsa su mobile.
 - `src/i18n/it.ts`, `.env.example`, `README.md`, CI GitHub Actions (lint, format, typecheck, test, drizzle check, drift schema↔migrazioni, build).
 - Test: 48 Vitest (di cui 16 di integrazione che applicano le migrazioni vere su PGlite con stub di `auth.*` e verificano RLS/funzioni/trigger) + 1 smoke Playwright. `pnpm lint && pnpm typecheck && pnpm test` verdi; `next build` senza warning anche a freddo (gli avvisi "Serializing big strings" della cache webpack sono silenziati in `next.config.ts` via `infrastructureLogging`: riguardano la cache di webpack, non il codice).
+
+## M1 — PR 2 (issue: creazione, dettaglio, campi)
+- **Creazione rapida**: tasto `C` (fuori dai campi di testo) o pulsante "Nuova" in topbar → dialog titolo/progetto (preselezionato dall'URL)/tipo/padre; Invio crea e apre il dettaglio.
+- **Dettaglio**: route intercettata `/p/[key]/@modal/(.)issues/[issueKey]` → pannello laterale (560px, espandibile a tutta larghezza, a tutto schermo sotto 768px); `/p/[key]/issues/[KEY-n]` aperto direttamente → pagina intera con lo stesso componente `IssueDetail`.
+- Campi inline con salvataggio immediato e update ottimistico (rollback + toast in caso di errore): stato, assegnatari, priorità, tipo (solo se la gerarchia resta valida), padre, label (creazione al volo solo admin/owner), inizio/scadenza (calendario, `gg/mm/aaaa`), giorni pianificati, avanzamento (slider + input; epic in sola lettura con il valore calcolato), rischio, collaboratori esterni (chip + autocomplete).
+- Titolo inline; descrizione **Tiptap** con `@tiptap/markdown` (grassetto, corsivo, titolo, elenchi, codice, link), salvata in `description_md`, `description_text` derivato lato server.
+- **Figli**: lista con stato/assegnatari/avanzamento, creazione inline, riordino drag (dnd-kit, anche da tastiera) → `reorderIssue`. **Collegamenti**: correlata / blocca / è bloccata da con ricerca per chiave o titolo; badge "Bloccata" se un'issue bloccante non è in categoria `done`.
+- Menu `…`: copia link, archivia/ripristina (member solo le proprie), elimina definitivamente (admin/owner, digitando la chiave).
+- Tab **Attività** in italiano con valori risolti (`src/features/issues/activity-format.ts`, testato).
+- **Ricerca globale** `Ctrl/Cmd+K`: RPC `search_issues`, risultati raggruppati per progetto.
+- La pagina progetto mostra per ora un elenco semplice di issue (sostituito dalla Tabella nella PR 3).
+- E2E: `e2e/app/issue-flow.spec.ts`, `e2e/app/epic-progress.spec.ts` (richiedono `pnpm test:e2e:login`, vedi README).
 
 ## Decisioni dalla review M0 (2026-11-01, Claudio)
 1. **Progetti privati**: admin e owner devono vedere i progetti privati in Impostazioni → Progetti e gestirne i membri, ma leggono le issue solo se membri. Regola aggiunta a CLAUDE.md §2 e §4 (riga "Gestire membri di progetti privati"). **Da fare in M1**: correggere policy RLS (`projects_select` oggi usa `can_read_project`, che nasconde il progetto agli admin non membri; separare "vedere il progetto come configurazione" da "leggere le issue") e la UI Impostazioni. La sidebar resta filtrata ai progetti di cui si leggono le issue.

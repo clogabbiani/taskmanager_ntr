@@ -4,7 +4,7 @@ import { listProjects } from "@/features/projects/queries";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const member = await requireMember();
-  const projects = await listProjects(member.workspaceId);
+  const projects = await listProjects(member.workspaceId, member.id);
 
   return (
     <AppShell member={member} projects={projects}>

@@ -54,3 +54,10 @@ export const requireMember = cache(async (): Promise<CurrentMember> => {
     workspaceName: data.workspaces.name,
   };
 });
+
+/** Workspace admin or owner; others are sent to their profile page (CLAUDE.md §4). */
+export async function requireAdmin(): Promise<CurrentMember> {
+  const member = await requireMember();
+  if (member.role !== "owner" && member.role !== "admin") redirect("/settings/profile");
+  return member;
+}

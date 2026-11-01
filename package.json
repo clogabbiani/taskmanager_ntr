@@ -19,10 +19,21 @@
     "db:seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
+    "@tanstack/react-query": "^5.105.1",
+    "@tanstack/react-table": "^8",
+    "@tanstack/react-virtual": "^3.14.25",
+    "@tiptap/markdown": "^3.32.2",
+    "@tiptap/pm": "^3.32.2",
+    "@tiptap/react": "^3.32.2",
+    "@tiptap/starter-kit": "^3.32.2",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",
+    "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.4",
     "lucide-react": "^1.64.0",
     "next": "15.5.28",
@@ -32,7 +43,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "server-only": "^0.0.1",
-    "shadcn": "^4.23.0"
+    "shadcn": "^4.23.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.13",

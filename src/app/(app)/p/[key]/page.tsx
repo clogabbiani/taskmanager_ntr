@@ -1,10 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Lock } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { requireMember } from "@/features/auth/session";
-import { IssueList } from "@/features/issues/components/issue-list";
+import { IssueTable } from "@/features/issues/components/issue-table";
 import { getProjectByKey } from "@/features/projects/queries";
 import { PROJECT_VIEWS } from "@/features/projects/views";
 import { it } from "@/i18n/it";
@@ -56,7 +57,9 @@ export default async function ProjectPage({ params }: { params: Params }) {
           )}
         </TabsList>
         <TabsContent value="table">
-          <IssueList projectId={project.id} projectKey={project.key} />
+          <Suspense>
+            <IssueTable projectId={project.id} projectKey={project.key} />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </section>

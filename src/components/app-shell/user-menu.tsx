@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut, Monitor, Moon, Sun } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Monitor, Moon, Sun, UserRound } from "lucide-react";
 import { useTheme } from "next-themes";
 import type { CurrentMember } from "@/features/auth/session";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,6 +44,12 @@ export function UserMenu({ member }: { member: CurrentMember }) {
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/settings/profile">
+            <UserRound aria-hidden="true" />
+            {it.nav.profile}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>{it.userMenu.theme}</DropdownMenuSubTrigger>
           <DropdownMenuSubContent>

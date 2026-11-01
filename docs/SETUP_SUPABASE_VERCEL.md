@@ -96,7 +96,7 @@ Dashboard Supabase → **Authentication → URL Configuration**:
 2. **Accedi con Google** con `c.gabbiani@ntrbiosensors.com` → entri, vedi la sidebar con **NBI** e il menu utente con ruolo *Proprietario*.
 3. Esci (menu avatar → **Esci**).
 4. Accedi con `clogabbiani@gmail.com` (non in allow-list). Esito atteso: accesso **rifiutato** e in Supabase `public.users` nessuna nuova riga.
-   ⚠️ Con Audience *Internal* (B.3) il rifiuto arriva **da Google** ("Accesso bloccato: l'app è limitata agli utenti della sua organizzazione"), prima di raggiungere TASKME: la pagina **Accesso non autorizzato** di TASKME non compare. Il percorso di rifiuto di TASKME (`claim_signin` / callback) è coperto dai test automatici in `tests/db/rls.test.ts`. Per vederlo anche dal vivo serve un account che superi Google ma non l'allow-list: con il dominio intero in allow-list non esiste, quindi si dovrebbe passare temporaneamente l'Audience a *External* (vedi `STATUS.md`).
+   Con Audience *Internal* (B.3) il rifiuto arriva **da Google** ("Accesso bloccato: l'app è limitata agli utenti della sua organizzazione"), prima di raggiungere TASKME, quindi la pagina **Accesso non autorizzato** di TASKME non compare. **Questo è l'esito atteso e vale come DoD** (decisione 2026-11-01). Il rifiuto lato TASKME (`claim_signin` / callback) è coperto dai test automatici in `tests/db/rls.test.ts`.
 5. In GitHub → tab **Actions**: il workflow **CI** sulla PR è verde.
 
 Se qualcosa non torna, annota in `STATUS.md` → *Bloccato / Escalation* il passo e il messaggio d'errore.

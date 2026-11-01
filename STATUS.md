@@ -25,13 +25,13 @@ Aggiornato: 2026-11-01 (sessione 2, governance dopo review M0)
 6. **Owner**: Claudio accede con `c.gabbiani@ntrbiosensors.com`; aggiornati `migration/user_mapping.json`, seed, CLAUDE.md §4. `clogabbiani@gmail.com` è volutamente fuori dall'allow-list (account "non autorizzato" per il test G.4; c'è un test che lo garantisce).
    6.2. Email di Edoardo: `e.salamone@ntrbiosensors.com` (in `user_mapping.json`): il seed ora lo aggiunge come admin e come membro di PN.
 7. **Google OAuth Audience = Internal** (setup B.3): niente *Publish app* né test user. Guida aggiornata.
+8. **Test G.4** (escalation chiusa): l'Audience resta *Internal*. Il blocco di Google su `clogabbiani@gmail.com` è un esito valido della DoD M0; il rifiuto lato TASKME è coperto da `tests/db/rls.test.ts`. Guida G.4 aggiornata.
 
 ## In corso
 - (nulla)
 
 ## Bloccato / Escalation
 - Nessuna decisione [VINCOLANTE] modificata in autonomia.
-- **Da valutare (Claudio)**: con Audience *Internal* Google blocca `clogabbiani@gmail.com` prima che arrivi a TASKME, quindi il test G.4 mostra la pagina di blocco di Google e non "Accesso non autorizzato" di TASKME. Il rifiuto lato TASKME è coperto da `tests/db/rls.test.ts`. Se la DoD M0 ("viene rifiutato per una [email] fuori") deve mostrare la pagina TASKME dal vivo, serve passare temporaneamente l'Audience a *External* durante il test, o accettare il blocco di Google come esito valido.
 
 ## Da fare a mano (Claudio)
 - Passi A–G di `docs/SETUP_SUPABASE_VERCEL.md`: progetto Supabase, client OAuth Google, provider Google, `pnpm db:migrate` + `pnpm db:seed`, Vercel, redirect URL, verifica DoD.

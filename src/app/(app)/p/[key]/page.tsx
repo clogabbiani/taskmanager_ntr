@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ProjectPage({ params }: { params: Params }) {
   const { key } = await params;
   const member = await requireMember();
-  const project = await getProjectByKey(member.workspaceId, key);
-  if (!project) notFound();
+  const project = await getProjectByKey(member.workspaceId, member.id, key);
+  if (!project?.can_read) notFound();
 
   return (
     <section className="flex flex-col gap-4">

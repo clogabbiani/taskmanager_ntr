@@ -68,6 +68,17 @@ export const it = {
   },
   errors: {
     generic: "Si è verificato un errore.",
+    forbidden: "Non hai i permessi per questa operazione.",
+    invalid: "Dati non validi.",
+    not_found: "Elemento non trovato o non accessibile.",
+    duplicate: "Esiste già un elemento con questo nome.",
+    hierarchy: "Gerarchia non valida: epic → task → sottoattività.",
+    dates: "La data di inizio deve precedere la scadenza.",
+    epic_progress: "L'avanzamento di un'epic è calcolato dai figli.",
+    status_category_required: "Serve almeno uno stato per ogni categoria (Da fare, In corso, Completato).",
+    status_has_issues: "Lo stato contiene issue: scegli dove spostarle.",
+    confirm_mismatch: "La chiave digitata non corrisponde.",
+    owner_protected: "Il ruolo del proprietario non può essere modificato.",
   },
 } as const;
 

@@ -5,7 +5,7 @@ import { it } from "@/i18n/it";
 
 export default async function HomePage() {
   const member = await requireMember();
-  const [first] = await listProjects(member.workspaceId);
+  const [first] = await listProjects(member.workspaceId, member.id);
   if (first) redirect(`/p/${first.key}`);
 
   return (

@@ -14,6 +14,7 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  customType,
   date,
   foreignKey,
   index,
@@ -58,6 +59,9 @@ export const notificationKind = pgEnum("notification_kind", [
 ]);
 export const emailDigest = pgEnum("email_digest", ["off", "daily"]);
 export const savedViewKind = pgEnum("saved_view_kind", ["board", "table", "timeline", "calendar"]);
+
+// Full-text search vector, maintained by Postgres as a generated column.
+const tsvector = customType<{ data: string }>({ dataType: () => "tsvector" });
 
 // ---------------------------------------------------------------------------
 // Shared column helpers
@@ -210,7 +214,9 @@ export const issues = pgTable(
     description_text: text("description_text"),
     status_id: uuid("status_id")
       .notNull()
-      .references(() => statuses.id, { onDelete: "restrict" }),
+      // NO ACTION (checked at end of statement) so a project delete can cascade to
+      // both issues and statuses; status deletion with issues is blocked by trigger.
+      .references(() => statuses.id, { onDelete: "no action" }),
     priority: issuePriority("priority").notNull().default("medium"),
     start_date: date("start_date"),
     due_date: date("due_date"),
@@ -224,6 +230,9 @@ export const issues = pgTable(
     rank: text("rank"),
     created_by: uuid("created_by").references(() => users.id, { onDelete: "set null", onUpdate: "cascade" }),
     archived_at: archivedAt(),
+    search_vector: tsvector("search_vector").generatedAlwaysAs(
+      sql`to_tsvector('italian'::regconfig, coalesce(title, '') || ' ' || coalesce(description_text, ''))`,
+    ),
     ...timestamps(),
   },
   (t) => [
@@ -233,10 +242,7 @@ export const issues = pgTable(
     index("issues_parent_idx").on(t.parent_id),
     index("issues_project_rank_idx").on(t.project_id, t.rank),
     index("issues_due_date_idx").on(t.due_date),
-    index("issues_fts_idx").using(
-      "gin",
-      sql`to_tsvector('italian', coalesce(${t.title}, '') || ' ' || coalesce(${t.description_text}, ''))`,
-    ),
+    index("issues_search_idx").using("gin", t.search_vector),
     check("issues_progress_range", sql`${t.progress} between 0 and 100`),
     check("issues_planned_days_nonneg", sql`${t.planned_days} is null or ${t.planned_days} >= 0`),
     check("issues_number_positive", sql`${t.number} > 0`),
@@ -310,11 +316,14 @@ export const comments = pgTable(
     body_text: text("body_text").notNull().default(""),
     edited_at: timestamp("edited_at", { withTimezone: true }),
     archived_at: archivedAt(),
+    search_vector: tsvector("search_vector").generatedAlwaysAs(
+      sql`to_tsvector('italian'::regconfig, coalesce(body_text, ''))`,
+    ),
     ...timestamps(),
   },
   (t) => [
     index("comments_issue_idx").on(t.issue_id, t.created_at),
-    index("comments_fts_idx").using("gin", sql`to_tsvector('italian', coalesce(${t.body_text}, ''))`),
+    index("comments_search_idx").using("gin", t.search_vector),
   ],
 );
 
@@ -417,3 +426,8 @@ export type Issue = typeof issues.$inferSelect;
 export type WorkspaceRole = (typeof workspaceRole.enumValues)[number];
 export type StatusCategory = (typeof statusCategory.enumValues)[number];
 export type IssueType = (typeof issueType.enumValues)[number];
+export type IssuePriority = (typeof issuePriority.enumValues)[number];
+export type IssueRisk = (typeof issueRisk.enumValues)[number];
+export type IssueLinkKind = (typeof issueLinkKind.enumValues)[number];
+export type SavedViewKind = (typeof savedViewKind.enumValues)[number];
+export type ActivityAction = (typeof activityAction.enumValues)[number];

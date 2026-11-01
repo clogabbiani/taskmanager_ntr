@@ -1,6 +1,6 @@
 # STATUS.md — TASKME NTR
 
-Aggiornato: 2026-10-29 (sessione 1, M0 Bootstrap)
+Aggiornato: 2026-11-01 (sessione 2, governance dopo review M0)
 
 ## Stato
 - Fase 1, milestone corrente: **M0 Bootstrap** — codice completo sul branch `feat/m0-bootstrap` (PR verso `main`).
@@ -16,11 +16,22 @@ Aggiornato: 2026-10-29 (sessione 1, M0 Bootstrap)
 - `src/i18n/it.ts`, `.env.example`, `README.md`, CI GitHub Actions (lint, format, typecheck, test, drizzle check, drift schema↔migrazioni, build).
 - Test: 48 Vitest (di cui 16 di integrazione che applicano le migrazioni vere su PGlite con stub di `auth.*` e verificano RLS/funzioni/trigger) + 1 smoke Playwright. `pnpm lint && pnpm typecheck && pnpm test` verdi; `next build` senza warning anche a freddo (gli avvisi "Serializing big strings" della cache webpack sono silenziati in `next.config.ts` via `infrastructureLogging`: riguardano la cache di webpack, non il codice).
 
+## Decisioni dalla review M0 (2026-11-01, Claudio)
+1. **Progetti privati**: admin e owner devono vedere i progetti privati in Impostazioni → Progetti e gestirne i membri, ma leggono le issue solo se membri. Regola aggiunta a CLAUDE.md §2 e §4 (riga "Gestire membri di progetti privati"). **Da fare in M1**: correggere policy RLS (`projects_select` oggi usa `can_read_project`, che nasconde il progetto agli admin non membri; separare "vedere il progetto come configurazione" da "leggere le issue") e la UI Impostazioni. La sidebar resta filtrata ai progetti di cui si leggono le issue.
+2. **"Almeno uno stato per categoria" a livello DB**: rinvio a M1 confermato.
+3. **Playwright in CI**: da M2.
+4. **Avvisi cache webpack silenziati** in `next.config.ts`: approvato.
+5. **Q1 risolta**: dominio Workspace `ntrbiosensors.com`. Il seed lo mette in `allowed_signins` di default (`SEED_ALLOWED_DOMAINS` non impostata).
+6. **Owner**: Claudio accede con `c.gabbiani@ntrbiosensors.com`; aggiornati `migration/user_mapping.json`, seed, CLAUDE.md §4. `clogabbiani@gmail.com` è volutamente fuori dall'allow-list (account "non autorizzato" per il test G.4; c'è un test che lo garantisce).
+   6.2. Email di Edoardo: `e.salamone@ntrbiosensors.com` (in `user_mapping.json`): il seed ora lo aggiunge come admin e come membro di PN.
+7. **Google OAuth Audience = Internal** (setup B.3): niente *Publish app* né test user. Guida aggiornata.
+8. **Test G.4** (escalation chiusa): l'Audience resta *Internal*. Il blocco di Google su `clogabbiani@gmail.com` è un esito valido della DoD M0; il rifiuto lato TASKME è coperto da `tests/db/rls.test.ts`. Guida G.4 aggiornata.
+
 ## In corso
 - (nulla)
 
 ## Bloccato / Escalation
-- (nulla) — nessuna decisione [VINCOLANTE] modificata.
+- Nessuna decisione [VINCOLANTE] modificata in autonomia.
 
 ## Da fare a mano (Claudio)
 - Passi A–G di `docs/SETUP_SUPABASE_VERCEL.md`: progetto Supabase, client OAuth Google, provider Google, `pnpm db:migrate` + `pnpm db:seed`, Vercel, redirect URL, verifica DoD.
@@ -28,15 +39,15 @@ Aggiornato: 2026-10-29 (sessione 1, M0 Bootstrap)
 
 ## Note di implementazione (per M1+)
 - `users.id` = `auth.users.id` dopo il primo login; gli utenti seminati hanno id provvisorio, riallineato da `claim_signin()` (FK `ON UPDATE CASCADE`).
-- Progetti privati: visibili **solo** ai `project_members`, anche per admin/owner (lettura stretta di §2). Gli admin possono però gestire `project_members` di qualunque progetto del workspace. Un admin che crea un progetto privato deve aggiungersi ai membri per vederlo: gestirlo nella UI M1.
-- Il vincolo "almeno uno stato per categoria" (§3.2) non è ancora imposto a livello DB: da fare in M1 con la gestione stati.
+- Progetti privati: **oggi** (M0) l'RLS li nasconde del tutto ai non membri, anche ad admin/owner; le policy su `project_members` permettono già agli admin di gestirne i membri. In M1 va allineato alla nuova regola (vedi decisione 1).
+- Il vincolo "almeno uno stato per categoria" (§3.2) non è ancora imposto a livello DB: in M1 con la gestione stati (confermato).
 - "member archivia solo le proprie issue" è imposto da trigger (`created_by = auth.uid()`); le chiamate senza JWT (script/service role) non sono limitate.
 - Seed: i ruoli mappati vengono applicati solo se il membro ha ancora il ruolo `member` (non sovrascrive promozioni manuali).
-- Playwright non è in CI (richiede browser): gira in locale con `pnpm test:e2e`; si può puntare a una preview con `E2E_BASE_URL`.
+- Playwright non è in CI: arriva in M2 (deciso). Fino ad allora gira in locale con `pnpm test:e2e`; si può puntare a una preview con `E2E_BASE_URL`.
 
 ## Domande aperte (vedi CLAUDE.md §10)
-- Q1 dominio Workspace per allow-list — placeholder attivo: solo `clogabbiani@gmail.com` (dominio aggiungibile con `SEED_ALLOWED_DOMAINS`).
-- Q2 email Edoardo / Merk / Nicola; "Marco" = Merk? — il seed li salta e lo segnala; PN resta senza membri (quindi invisibile a tutti) finché manca l'email di Edoardo.
+- ~~Q1 dominio Workspace~~ — **risolta**: `ntrbiosensors.com`.
+- Q2 — parziale: Claudio e Edoardo risolti; mancano le email di Merk e Nicola (il seed li salta e lo segnala; con il dominio in allow-list potranno comunque entrare, ma come `member` finché non si rilancia il seed con le email o li si promuove); "Marco" = Merk ancora da confermare.
 - Q3 dominio app e mittente Resend — placeholder: URL Vercel di default, `onboarding@resend.dev`.
 - Q4 progetti aggiuntivi al cutover — solo NBI e PN.
 

@@ -72,7 +72,8 @@ Struttura repo:
 
 - Un solo **workspace**: "NTR Biosensors". Il modello dati è multi-workspace pronto, la UI di Fase 1 no.
 - Più **progetti** nel workspace. Ogni progetto ha una **key** (es. `NBI`, `PN`) e numera le issue `KEY-n`.
-- Progetti **privati**: visibili solo ai membri elencati. Serve per `PN` "Task personali NTR" (privato, membro: Edoardo). Tutti gli altri progetti sono visibili a tutto il workspace.
+- Progetti **privati**: le issue (e tutto ciò che vi è collegato: commenti, allegati, attività) sono leggibili solo dai membri elencati in `project_members`. Serve per `PN` "Task personali NTR" (privato, membro: Edoardo). Tutti gli altri progetti sono visibili a tutto il workspace.
+- Admin e owner **vedono sempre** i progetti privati come oggetti di configurazione (Impostazioni → Progetti: nome, key, colore, stati, membri) e ne **gestiscono i membri**, ma ne leggono le issue solo se sono anch'essi membri del progetto. (Decisione 2026-11-01, review M0.)
 
 ---
 
@@ -153,7 +154,8 @@ saved_views           id, workspace_id, project_id (nullable = cross-progetto), 
 - Login **solo Google** (Supabase Auth, provider Google). Niente password.
 - Al callback: l'email deve corrispondere a una riga di `allowed_signins` (dominio Workspace NTR oppure email singola in allow-list). Altrimenti: sessione terminata, pagina "Accesso non autorizzato", nessun utente creato.
 - Primo accesso autorizzato → riga in `users` + `workspace_members` con ruolo `member`. Promozione a `admin` dalla pagina Impostazioni → Membri.
-- Seed iniziale: Claudio Gabbiani `owner`; Edoardo Salamone, Merk, Nicola Ferrante `admin`. Le email reali vanno in `migration/user_mapping.json` (da compilare, vedi §10).
+- Seed iniziale: Claudio Gabbiani `owner` (accede con `c.gabbiani@ntrbiosensors.com`); Edoardo Salamone (`e.salamone@ntrbiosensors.com`), Merk, Nicola Ferrante `admin`. Le email reali vanno in `migration/user_mapping.json` (Merk e Nicola da compilare, vedi §10).
+- `clogabbiani@gmail.com` **non** è in allow-list: è l'account di prova "non autorizzato" per la verifica del rifiuto al login.
 
 Ruoli (workspace-level):
 
@@ -165,6 +167,7 @@ Ruoli (workspace-level):
 | Creare/modificare/archiviare progetti, stati, label | | | ✓ | ✓ |
 | Invitare/rimuovere membri, cambiare ruoli, allow-list | | | ✓ | ✓ |
 | Eliminare definitivamente (hard delete) | | | ✓ | ✓ |
+| Gestire membri di progetti privati (anche senza esserne membri; le issue restano visibili solo ai membri) | | | ✓ | ✓ |
 | Trasferire ownership, eliminare workspace | | | | ✓ |
 
 L'owner non può essere declassato da un admin. Non c'è altra differenza fra admin e owner.
@@ -288,8 +291,8 @@ Stima indicativa: M0 1 sessione, M1 2-3, M2 2-3, M3 2, M4 1. Il Gantt è il risc
 
 | # | Domanda | Placeholder finché non risolta |
 |---|---|---|
-| Q1 | Dominio email Google Workspace NTR da mettere in `allowed_signins` | `allowed_signins` contiene solo `('email','clogabbiani@gmail.com')` |
-| Q2 | Email reali di Edoardo Salamone, Merk, Nicola Ferrante; "Marco" negli Assegnatari originali è Merk? | `user_mapping.json` con campi `email: null`; import assegna a `external_collaborators` i nomi senza email |
+| Q1 | ~~Dominio email Google Workspace NTR da mettere in `allowed_signins`~~ **Risolta 2026-11-01**: `ntrbiosensors.com` | `allowed_signins` = `('domain','ntrbiosensors.com')` + email dei membri mappati |
+| Q2 | Email reali di Merk, Nicola Ferrante; "Marco" negli Assegnatari originali è Merk? (Claudio = `c.gabbiani@ntrbiosensors.com`, Edoardo = `e.salamone@ntrbiosensors.com`: risolte 2026-11-01) | `user_mapping.json` con campi `email: null`; import assegna a `external_collaborators` i nomi senza email |
 | Q3 | Dominio pubblico dell'app (es. `taskme.ntrbiosensors.it`) e dominio mittente per Resend | URL Vercel di default; mittente `onboarding@resend.dev` in sviluppo |
 | Q4 | Progetti aggiuntivi oltre NBI e PN da creare al cutover (es. QMS, Fornitori, Firmware come progetti separati invece che epic) | Solo NBI e PN; le 12 epic restano epic |
 

@@ -27,15 +27,14 @@ Ordine: **A** Supabase → **B** Google Cloud → **C** provider Google in Supab
 
 ## B. Client OAuth in Google Cloud Console
 
-1. Vai su <https://console.cloud.google.com/> con l'account Google di Claudio (o l'account amministratore del Workspace NTR, se preferisci che il client OAuth appartenga all'organizzazione).
+1. Vai su <https://console.cloud.google.com/> con l'account **`c.gabbiani@ntrbiosensors.com`**. Il progetto Google Cloud deve appartenere all'organizzazione `ntrbiosensors.com` (selettore progetto → *Organization*: `ntrbiosensors.com`), altrimenti l'opzione *Internal* al punto 3 non è disponibile.
 2. In alto: selettore progetto → **New Project** → nome `TASKME NTR` → **Create** → selezionalo.
 3. Menu ☰ → **APIs & Services → OAuth consent screen** (in alcune console: **Google Auth Platform → Branding**).
    - **Get started** / **Configure**.
    - App name: `TASKME NTR`; User support email: la tua.
-   - Audience: **External** (necessario perché `clogabbiani@gmail.com` non è un account del Workspace NTR; con solo account aziendali potresti scegliere *Internal*).
+   - Audience: **Internal** — tutti gli utenti TASKME sono account del Workspace `ntrbiosensors.com`. Con *Internal* non serve né *Publish app* né la lista *Test users*, e Google non richiede verifica dell'app.
    - Contact email: la tua → **Create**.
    - **Data access / Scopes**: aggiungi `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile` → Save.
-   - **Audience → Publishing status**: lascia *Testing* e in **Test users** aggiungi le 4 email del team, **oppure** premi **Publish app** (con soli scope base non serve la verifica Google). Consigliato: *Publish app*, così non devi gestire la lista test user; l'accesso resta comunque filtrato dall'allow-list di TASKME.
 4. **APIs & Services → Credentials** (o **Clients**) → **Create credentials → OAuth client ID**.
    - Application type: **Web application**; Name: `TASKME Supabase`.
    - **Authorized JavaScript origins**: `http://localhost:3000` e (dopo il passo E) `https://<tuo-progetto>.vercel.app`.
@@ -61,8 +60,8 @@ pnpm db:migrate              # applica drizzle/0000_init.sql e 0001_rls_and_func
 pnpm db:seed                 # workspace, Claudio owner, NBI, PN, allow-list
 ```
 
-Il seed stampa gli utenti saltati (email mancanti in `migration/user_mapping.json`). Quando hai le email di Edoardo, Merk e Nicola (Q2), compilale nel file e rilancia `pnpm db:seed`: è idempotente.
-Quando conosci il dominio Workspace (Q1): `SEED_ALLOWED_DOMAINS=ntrbiosensors.it pnpm db:seed`.
+Il seed mette in `allowed_signins` il dominio `ntrbiosensors.com` (Q1) e le email dei membri mappati; aggiunge Edoardo al progetto privato PN. Stampa gli utenti saltati (email mancanti in `migration/user_mapping.json`): quando hai le email di Merk e Nicola (Q2), compilale nel file e rilancia `pnpm db:seed`: è idempotente.
+`clogabbiani@gmail.com` resta volutamente **fuori** dall'allow-list.
 
 Verifica in Supabase → **Table Editor**: `workspaces` (1 riga), `projects` (NBI, PN), `statuses` (8 righe), `allowed_signins`.
 In **Authentication → Policies** ogni tabella deve risultare *RLS enabled*.
@@ -94,9 +93,10 @@ Dashboard Supabase → **Authentication → URL Configuration**:
 ## G. Verifica Definition of Done M0
 
 1. Apri l'URL di produzione → vieni rediretto a `/login`.
-2. **Accedi con Google** con `clogabbiani@gmail.com` → entri, vedi la sidebar con **NBI** e il menu utente con ruolo *Proprietario*.
+2. **Accedi con Google** con `c.gabbiani@ntrbiosensors.com` → entri, vedi la sidebar con **NBI** e il menu utente con ruolo *Proprietario*.
 3. Esci (menu avatar → **Esci**).
-4. Accedi con un account Google **non** in allow-list (es. un Gmail personale diverso) → pagina **Accesso non autorizzato**; in Supabase `public.users` non compare nessuna nuova riga.
+4. Accedi con `clogabbiani@gmail.com` (non in allow-list). Esito atteso: accesso **rifiutato** e in Supabase `public.users` nessuna nuova riga.
+   ⚠️ Con Audience *Internal* (B.3) il rifiuto arriva **da Google** ("Accesso bloccato: l'app è limitata agli utenti della sua organizzazione"), prima di raggiungere TASKME: la pagina **Accesso non autorizzato** di TASKME non compare. Il percorso di rifiuto di TASKME (`claim_signin` / callback) è coperto dai test automatici in `tests/db/rls.test.ts`. Per vederlo anche dal vivo serve un account che superi Google ma non l'allow-list: con il dominio intero in allow-list non esiste, quindi si dovrebbe passare temporaneamente l'Audience a *External* (vedi `STATUS.md`).
 5. In GitHub → tab **Actions**: il workflow **CI** sulla PR è verde.
 
 Se qualcosa non torna, annota in `STATUS.md` → *Bloccato / Escalation* il passo e il messaggio d'errore.

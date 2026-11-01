@@ -29,8 +29,8 @@ export const SEED_PROJECTS: SeedProject[] = [
   { key: "PN", name: "Task personali NTR", color: "#a855f7", isPrivate: true, members: ["Edoardo Salamone"] },
 ];
 
-/** Q1 placeholder (CLAUDE.md §10): the allow-list always contains the owner's email. */
-export const DEFAULT_ALLOWED_EMAILS = ["clogabbiani@gmail.com"];
+/** Q1 (CLAUDE.md §10, resolved): the NTR Google Workspace domain. */
+export const DEFAULT_ALLOWED_DOMAINS = ["ntrbiosensors.com"];
 
 export type SeedPlan = {
   users: { email: string; displayName: string; role: WorkspaceRole }[];
@@ -42,7 +42,7 @@ export type SeedPlan = {
 
 const normaliseEmail = (email: string) => email.trim().toLowerCase();
 
-export function planSeed(mapping: UserMapping, allowedDomains: string[] = []): SeedPlan {
+export function planSeed(mapping: UserMapping, allowedDomains: string[] = DEFAULT_ALLOWED_DOMAINS): SeedPlan {
   const users: SeedPlan["users"] = [];
   const skipped: SeedPlan["skipped"] = [];
   const emailByName = new Map<string, string>();
@@ -61,7 +61,8 @@ export function planSeed(mapping: UserMapping, allowedDomains: string[] = []): S
     throw new Error("user_mapping.json must contain exactly one user with role 'owner' and an email");
   }
 
-  const allowedEmails = [...new Set([...DEFAULT_ALLOWED_EMAILS, ...users.map((u) => u.email)].map(normaliseEmail))];
+  // Only mapped users are allow-listed by email; everyone else needs the Workspace domain.
+  const allowedEmails = [...new Set(users.map((u) => u.email))];
   const domains = [...new Set(allowedDomains.map((d) => d.trim().toLowerCase().replace(/^@/, "")).filter(Boolean))];
 
   const projects = SEED_PROJECTS.map((project) => {

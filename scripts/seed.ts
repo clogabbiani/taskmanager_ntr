@@ -5,13 +5,14 @@
  * imported by application code. Re-running it is safe: existing rows are kept,
  * missing ones are added.
  *
- *   SEED_ALLOWED_DOMAINS=ntrbiosensors.it pnpm db:seed   # optional, once Q1 is resolved
+ *   pnpm db:seed                                   # allow-lists ntrbiosensors.com
+ *   SEED_ALLOWED_DOMAINS= pnpm db:seed             # empty: mapped emails only, no domain
  */
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import postgres from "postgres";
-import { planSeed, WORKSPACE, type UserMapping } from "./lib/seed-plan";
+import { DEFAULT_ALLOWED_DOMAINS, planSeed, WORKSPACE, type UserMapping } from "./lib/seed-plan";
 
 async function main() {
   const url = process.env.DATABASE_URL;
@@ -20,7 +21,7 @@ async function main() {
   const mapping = JSON.parse(
     readFileSync(path.resolve(__dirname, "../migration/user_mapping.json"), "utf8"),
   ) as UserMapping;
-  const domains = (process.env.SEED_ALLOWED_DOMAINS ?? "").split(",");
+  const domains = (process.env.SEED_ALLOWED_DOMAINS ?? DEFAULT_ALLOWED_DOMAINS.join(",")).split(",");
   const plan = planSeed(mapping, domains);
 
   const sql = postgres(url, { prepare: false, max: 1 });

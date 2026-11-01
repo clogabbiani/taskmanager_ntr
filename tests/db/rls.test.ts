@@ -132,10 +132,10 @@ describe("claim_signin (allow-list)", () => {
 });
 
 describe("project visibility", () => {
-  it("hides private projects from users not listed in project_members", async () => {
+  it("hides private projects from members not listed; admins always see them as configuration", async () => {
     expect(await asUser(db, member, () => count(`SELECT 1 FROM projects`))).toBe(1);
     expect(await asUser(db, admin, () => count(`SELECT 1 FROM projects`))).toBe(2);
-    expect(await asUser(db, owner, () => count(`SELECT 1 FROM projects WHERE id = $1`, [pn]))).toBe(0);
+    expect(await asUser(db, owner, () => count(`SELECT 1 FROM projects WHERE id = $1`, [pn]))).toBe(1);
   });
 
   it("lets only admins create projects", async () => {
